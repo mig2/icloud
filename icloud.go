@@ -1,23 +1,39 @@
-package icloud
+package main
 
-// Types global to ICloud
+import (
+	"flag"
+	"fmt"
+	"log"
 
-// Internal Functions
+	"github.com/mig2/icloud/contacts"
+	"github.com/mig2/icloud/engine"
+)
 
-// Not completely sure why I need this....
+var (
+	appleId  = flag.String("apple_id", "", "Apple ID to log in")
+	password = flag.String("password", "", "iCloud password")
+)
 
-// Functions from here on are exported
-
-// Functions exported on the ICloud type....
-
-/*
-
-func NewEngine(apple_id, password string) (*ICloudEngine, error) {
+func NewEngine(apple_id, password string) (*engine.ICloudEngine, error) {
 	return engine.NewEngine(apple_id, password)
 }
 
+/*
 func RemindersApp(e *ICloudEngine) (*ICloudRemindersApp, error){
 	return reminders.NewApp(e)
 }
-
 */
+
+func main() {
+	flag.Parse()
+	if *appleId == "" || *password == "" {
+		log.Fatal("Usage: go run icloud.go -apple_id=<apple ID> -password=<password>")
+	}
+	eng, e := NewEngine(*appleId, *password)
+	if e == nil {
+		cr, _ := contacts.Get(eng)
+		fmt.Printf("Got contacts: %v\n", cr.Contacts)
+	} else {
+		fmt.Printf("Got err: %v", e)
+	}
+}

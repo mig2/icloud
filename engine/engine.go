@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -107,7 +108,10 @@ func getICloudVersion(client *http.Client) (*ICloudVersion, error) {
 
 func NewEngine(apple_id, password string) (engine *ICloudEngine, e error) {
 
-	cookieJar, _ := cookiejar.New(nil)
+	cookieJar, err := cookiejar.New(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	client := &http.Client{
 		Jar: cookieJar,
@@ -125,7 +129,6 @@ func NewEngine(apple_id, password string) (engine *ICloudEngine, e error) {
 		"password":       password,
 		"extended_login": "false",
 	}
-
 	data, _ := json.Marshal(info)
 
 	var req *http.Request
@@ -139,6 +142,8 @@ func NewEngine(apple_id, password string) (engine *ICloudEngine, e error) {
 	req.URL.RawQuery = v.Encode()
 	req.Header.Set("Content-Type", "text/plain")
 	req.Header.Add("Origin", "https://www.icloud.com")
+	req.Header.Add("Referer", "https://www.icloud.com/")
+	req.Header.Set("User-Agent", "Opera/9.52 (X11; Linux i686; U; en)")
 
 	var resp *http.Response
 	if resp, e = client.Do(req); e != nil {
